@@ -1,4 +1,4 @@
-include("pyramid.jl")
+include("under_gap.jl")
 r=Robot("start_cond.sit"; animate=true)
-pyramid(r)
+under_gap!(r)
 #show!(r)
