@@ -13,6 +13,12 @@ HorizonSideRobots.ismarker(robot::SampleRobot) = ismarker(get_robot(robot))
 HorizonSideRobots.temperature(robot::SampleRobot) = temperature(get_robot(robot))
 HorizonSideRobots.ismarker(r :: SampleRobot) = ismarker(get_robot(r))
 
+#костыль
+
+struct BaseRobot <:SampleRobot
+    robo :: Robot
+end
+
 #painter struct
 
 struct Painter <: SampleRobot
@@ -43,7 +49,7 @@ end
 
 along!(robot :: SampleRobot, side :: HorizonSide) = while !isborder(robot,side) move!(robot,side) end
 
-along!(robot :: SampleRobot, side :: HorizonSide, num_steps :: Int) = while num_steps>0 move!(robot,side); steps-=1 end
+along!(robot :: SampleRobot, side :: HorizonSide, num_steps :: Int) = while num_steps>0 move!(robot,side); num_steps-=1 end
 
 function snake!(cond :: Function, robot :: SampleRobot, (move_side, next_row_side) :: NTuple{2, HorizonSide}=(Ost,Nord)) 
     while cond(robot,move_side)
@@ -66,6 +72,6 @@ end
 function shuttle!(cond :: Function, robot :: SampleRobot, side :: HorizonSide) 
     steps = 1
     while cond(robot,side)
-        along!(robot,side,steps); side=inverse(side)
+        along!(robot,side,steps); side=inverse(side); steps+=1
     end
 end
