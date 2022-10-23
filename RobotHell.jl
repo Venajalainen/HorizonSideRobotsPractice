@@ -15,7 +15,7 @@ HorizonSideRobots.ismarker(r :: SampleRobot) = ismarker(get_robot(r))
 
 #костыль
 
-struct BaseRobot <:SampleRobot
+struct BaseRobot <: SampleRobot
     robo :: Robot
 end
 
@@ -39,7 +39,7 @@ clockwise(side :: HorizonSide) = HorizonSide(mod(Int(side)+1,4))
 
 along!(cond :: Function, robot :: SampleRobot, side :: HorizonSide) = while cond(robot,side) && !isborder(r,side) move!(robot,side) end 
 
-along!(cond :: Function, robot :: SampleRobot, side :: HorizonSide, max_num :: Int) =while cond(robot,side) && max_num>0 move!(robot,side) end
+along!(cond :: Function, robot :: SampleRobot, side :: HorizonSide, max_num :: Int) =while (cond(robot,side) && max_num>0) move!(robot,side); max_num-=1 end
 
 function numsteps_along!(cond :: Function, robot :: SampleRobot, side :: HorizonSide) :: Int 
     steps=0
@@ -64,7 +64,7 @@ snake!(robot :: SampleRobot, (move_side, next_row_side) :: NTuple{2, HorizonSide
 function spiral!(cond :: Function, robot :: SampleRobot) 
     steps=1; side=Nord
     while cond(robot) 
-        for i in 1:2 along!(robot,side,steps); side=clockwise(side) end
+        for i in 1:2 along!(cond,robot,side,steps); side=clockwise(side) end
         steps+=1
     end
 end
@@ -72,6 +72,6 @@ end
 function shuttle!(cond :: Function, robot :: SampleRobot, side :: HorizonSide) 
     steps = 1
     while cond(robot,side)
-        along!(robot,side,steps); side=inverse(side); steps+=1
+        along!(robot,side,steps); side=inverse(side)
     end
 end
