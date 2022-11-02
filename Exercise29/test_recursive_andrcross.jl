@@ -1,4 +1,4 @@
 include("recursive_andrcross.jl")
-r=Robot("start_cond.sit")
+r=Robot("test2.sit")
 recursive_andrcross!(r)
 show!(r)
