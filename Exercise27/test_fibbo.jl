@@ -1,7 +1,7 @@
 include("fibbo.jl")
 
-println(qfibbo(100))
+println(qfibbo(8))
 
-println(recfibbo(30))
+println(recfibbo(8))
 
-println(qrecfibbo(100))
+println(qrecfibbo(8))
