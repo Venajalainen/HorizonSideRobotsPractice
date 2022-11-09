@@ -4,7 +4,7 @@ using HorizonSideRobots
 
 abstract type SampleRobot end
 
-get_robot(r :: SampleRobot) = r.robo
+get_robot(r :: SampleRobot) = r.robot
 
 HorizonSideRobots.move!(robot::SampleRobot, side :: HorizonSide) = move!(get_robot(robot), side)
 HorizonSideRobots.isborder(robot::SampleRobot, side :: HorizonSide) = isborder(get_robot(robot), side)
@@ -13,21 +13,40 @@ HorizonSideRobots.ismarker(robot::SampleRobot) = ismarker(get_robot(robot))
 HorizonSideRobots.temperature(robot::SampleRobot) = temperature(get_robot(robot))
 HorizonSideRobots.ismarker(r :: SampleRobot) = ismarker(get_robot(r))
 
-#костыль
+abstract type AbstractCoordRobots <: SampleRobot end
 
-struct BaseRobot <: SampleRobot
-    robo :: Robot
+function HorizonSideRobots.move!(r :: AbstractCoordRobots, side :: HorizonSide)
+    switch(side) do side
+        side==Nord && (r.y+=1)
+        side==Sud && (r.y-=1)
+        side==West && (r.x+=1)
+        side==Ost && (r.x-=1)
+    end
+    move!(get_robot(r),side)
+end
+
+get_coords(r :: AbstractCoordRobots) = (r.x,r.y)
+
+
+
+#coord robot remembers start coordinate
+
+mutable struct CoordRobot <: AbstractCoordRobots
+    robot :: Union{SampleRobot,Robot}
+    x :: Int
+    y :: Int
+    CoordRobot(robot :: Union{SampleRobot,Robot} ) = new(robot,0,0)
 end
 
 #painter struct
 
 struct Painter <: SampleRobot
-    robo :: Robot
+    robot :: Robot
 end
 
 HorizonSideRobots.putmarker!(r :: Painter)=putmarker!(get_robot(r))
 function HorizonSideRobots.move!(r :: Painter, side :: HorizonSide)
-    robo=get_robot(r); putmarker!(robo); move!(robo,side)
+    robot=get_robot(r); putmarker!(robot); move!(robot,side)
 end
 
 #necessary functions
@@ -36,6 +55,8 @@ switch(f :: Function, x...) = f(x...)
 inverse(side :: HorizonSide) = HorizonSide(mod(Int(side)+2,4))
 
 clockwise(side :: HorizonSide) = HorizonSide(mod(Int(side)+1,4))
+
+anticlockwise(side :: HorizonSide) = HorizonSide(mod(Int(side)+3,4))
 
 along!(cond :: Function, robot :: SampleRobot, side :: HorizonSide) = while cond(robot,side) && !isborder(r,side) move!(robot,side) end 
 
@@ -72,6 +93,6 @@ end
 function shuttle!(cond :: Function, robot :: SampleRobot, side :: HorizonSide) 
     steps = 1
     while cond(robot,side)
-        along!(robot,side,steps); side=inverse(side)
+        along!(robot,side,steps); side=inverse(side); steps+=1
     end
 end
