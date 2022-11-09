@@ -1,0 +1,5 @@
+include("maxtemp.jl")
+r=Robot("start_cond.sit")
+maxtemp!(r)
+println(temperature(r))
+show!(r)
