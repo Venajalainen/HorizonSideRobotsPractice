@@ -1,5 +1,5 @@
 include("../RobotHell.jl")
-include("../Exercise33-35/specrobot.jl")
+include("../Exercise 33-35/specrobot.jl")
 
 mutable struct Checker <: AbstractCoordRobots
     robot :: Union{SampleRobot, Robot}

@@ -15,6 +15,8 @@ HorizonSideRobots.ismarker(r :: SampleRobot) = ismarker(get_robot(r))
 
 abstract type AbstractCoordRobots <: SampleRobot end
 
+activate!( robot :: AbstractCoordRobots ) = return
+
 function HorizonSideRobots.move!(r :: AbstractCoordRobots, side :: HorizonSide)
     switch(side) do side
         side==Nord && (r.y+=1)
@@ -36,6 +38,7 @@ mutable struct CoordRobot <: AbstractCoordRobots
     x :: Int
     y :: Int
     CoordRobot(robot :: Union{SampleRobot,Robot} ) = new(robot,0,0)
+    CoordRobot(robot :: Union{SampleRobot,Robot} , x, y ) = new(robot,x,y)
 end
 
 #painter struct

@@ -5,21 +5,22 @@ using HorizonSideRobots
 @enum Rotation Right = 0 Left = 1
 
 mutable struct BorderRobot <: SampleRobot
-    robot :: CoordRobot
+    robot :: AbstractCoordRobots
     rotation :: Rotation
     direction :: HorizonSide
     initial_direction :: HorizonSide
-    function BorderRobot( robot :: Robot )
+    function BorderRobot( robot :: Union{AbstractCoordRobots,Robot} )
         side :: HorizonSide = Nord
         trapped :: Bool = true
+        if typeof(robot) <: Robot robot=CoordRobot(robot) end
         for i in 1:4
             trapped = ( trapped && isborder( robot , side ) )
             if !isborder( robot , side ) && isborder( robot , right!( side ) )
-                return new( CoordRobot( robot ) , Right , side , side ) 
+                return new(  robot , Right , side , side ) 
             end
             side = right!( side )
         end
-        if trapped print( "I am inside the labirynth" ) ; return end
+        if trapped println( "I am trapped" ) ; return new(  robot , Right , Nord , Nord ) end
         throw( BadStartingCondition() )
     end
 end
@@ -35,7 +36,10 @@ right!( robot :: BorderRobot ) :: HorizonSide = anticlockwise( get_direction(rob
 left!( side :: HorizonSide ) :: HorizonSide = clockwise( side )
 left!( robot :: BorderRobot ) :: HorizonSide = clockwise( get_direction(robot) )
 
-rotate!(robot :: BorderRobot ) = ( robot.direction = ( get_rotation(robot) == Right ? right!( robot ) : left!( robot ) ) )
+function rotate!(robot :: BorderRobot )
+    activate!( robot )
+    ( robot.direction = ( get_rotation(robot) == Right ? right!( robot ) : left!( robot ) ) )
+end
 
 function change_rotation!( robot :: BorderRobot )
     robot.direction = inverse( get_direction( robot ) )
@@ -79,11 +83,12 @@ function need_move(robot :: BorderRobot, wallside :: HorizonSide) :: Bool
     if isborder( robot ) && ( !isborder( robot, right!( robot ) ) || !isborder( robot, left!( robot ) ) )
         if isborder( robot, ( get_rotation( robot ) == Right ? right!( robot ) : left!( robot ) ) )
             robot.direction=( get_rotation( robot ) == Right ? left!( robot ) : right!( robot ) )
+            activate!( robot )
             return false
         end
     end
     i=0
-    while isborder( robot )
+    while isborder( robot ) && i<4
         rotate!( robot )
         i+=1
     end
@@ -91,7 +96,7 @@ function need_move(robot :: BorderRobot, wallside :: HorizonSide) :: Bool
 end
 
 #move or rotate till the ability
-function HorizonSideRobots.move!( robot :: BorderRobot) :: Nothing
+function HorizonSideRobots.move!( robot :: BorderRobot)
     wallside = ( get_rotation( robot ) == Right ? right!( robot ) : left!( robot ) )
     if need_move( robot ,wallside ) != false
         move!(robot, get_direction( robot ) )
@@ -104,4 +109,3 @@ struct BadStartingCondition <: Exception
     msg :: String
     BadStartingCondition() = "No border around"
 end
-    
