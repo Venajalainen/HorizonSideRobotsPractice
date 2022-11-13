@@ -1,5 +1,0 @@
-include("half.jl")
-r=Robot("start_cond.sit"; animate=true)
-putmarker!(r)
-half!(r,West)
-putmarker!(r)

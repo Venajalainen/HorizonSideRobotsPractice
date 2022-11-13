@@ -1,0 +1,5 @@
+include("bordermarks.jl")
+r=Robot("start_cond.sit")
+#bordermarka!(r)
+bordermarkb!(r)
+show!(r)

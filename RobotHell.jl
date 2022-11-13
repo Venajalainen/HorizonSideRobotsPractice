@@ -58,21 +58,21 @@ clockwise(side :: HorizonSide) = HorizonSide(mod(Int(side)+1,4))
 
 anticlockwise(side :: HorizonSide) = HorizonSide(mod(Int(side)+3,4))
 
-along!(cond :: Function, robot :: SampleRobot, side :: HorizonSide) = while cond(robot,side) && !isborder(r,side) move!(robot,side) end 
+along!(cond :: Function, robot :: Union{SampleRobot, Robot} , side :: HorizonSide) = while cond(robot,side) && !isborder(r,side) move!(robot,side) end 
 
-along!(cond :: Function, robot :: SampleRobot, side :: HorizonSide, max_num :: Int) =while (cond(robot,side) && max_num>0) move!(robot,side); max_num-=1 end
+along!(cond :: Function, robot :: Union{SampleRobot, Robot}, side :: HorizonSide, max_num :: Int) =while (cond(robot,side) && max_num>0) move!(robot,side); max_num-=1 end
 
-function numsteps_along!(cond :: Function, robot :: SampleRobot, side :: HorizonSide) :: Int 
+function numsteps_along!(cond :: Function, robot :: Union{SampleRobot, Robot}, side :: HorizonSide) :: Int 
     steps=0
     while cond(robot,side) move!(robot,side); steps+=1 end
     return steps
 end
 
-along!(robot :: SampleRobot, side :: HorizonSide) = while !isborder(robot,side) move!(robot,side) end
+along!(robot :: Union{SampleRobot, Robot}, side :: HorizonSide) = while !isborder(robot,side) move!(robot,side) end
 
-along!(robot :: SampleRobot, side :: HorizonSide, num_steps :: Int) = while num_steps>0 move!(robot,side); num_steps-=1 end
+along!(robot :: Union{SampleRobot, Robot}, side :: HorizonSide, num_steps :: Int) = while num_steps>0 move!(robot,side); num_steps-=1 end
 
-function snake!(cond :: Function, robot :: SampleRobot, (move_side, next_row_side) :: NTuple{2, HorizonSide}=(Ost,Nord)) 
+function snake!(cond :: Function, robot :: Union{SampleRobot, Robot}, (move_side, next_row_side) :: NTuple{2, HorizonSide}=(Ost,Nord)) 
     while cond(robot,move_side)
         along!(cond,robot,move_side); 
         if !isborder(robot,next_row_side) move!(robot,next_row_side) else break end
@@ -80,9 +80,9 @@ function snake!(cond :: Function, robot :: SampleRobot, (move_side, next_row_sid
     end
 end
 
-snake!(robot :: SampleRobot, (move_side, next_row_side) :: NTuple{2, HorizonSide}=(Ost,Nord)) = snake!((x...) -> true, robot, (move_side, next_row_side))
+snake!(robot :: Union{SampleRobot, Robot}, (move_side, next_row_side) :: NTuple{2, HorizonSide}=(Ost,Nord)) = snake!((x...) -> true, robot, (move_side, next_row_side))
 
-function spiral!(cond :: Function, robot :: SampleRobot) 
+function spiral!(cond :: Function, robot :: Union{SampleRobot, Robot}) 
     steps=1; side=Nord
     while cond(robot) 
         for i in 1:2 along!(cond,robot,side,steps); side=clockwise(side) end
@@ -90,9 +90,23 @@ function spiral!(cond :: Function, robot :: SampleRobot)
     end
 end
 
-function shuttle!(cond :: Function, robot :: SampleRobot, side :: HorizonSide) 
+function shuttle!(cond :: Function, robot :: Union{SampleRobot, Robot}, side :: HorizonSide) 
     steps = 1
     while cond(robot,side)
         along!(robot,side,steps); side=inverse(side); steps+=1
     end
+end
+
+function collibrate!(robot :: Union{SampleRobot, Robot}; track :: Bool = true)
+    arr=()
+    while !isborder(robot, Nord) || !isborder(robot,West)
+        if !isborder(robot,Nord) arr=(Sud,arr...); move!(robot, Nord) end
+        if !isborder(robot,West) arr=(Ost,arr...); move!(robot, West) end
+    end
+    track && return arr
+end
+
+gohome!(robot :: Union{SampleRobot, Robot}, arr :: NTuple) = 
+for side in arr 
+    move!(robot,side)
 end
