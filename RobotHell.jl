@@ -15,7 +15,7 @@ HorizonSideRobots.ismarker(r :: SampleRobot) = ismarker(get_robot(r))
 
 abstract type AbstractCoordRobots <: SampleRobot end
 
-activate!( robot :: AbstractCoordRobots ) = return
+activate!( robot :: AbstractCoordRobots, x... ) = return
 
 function HorizonSideRobots.move!(r :: AbstractCoordRobots, side :: HorizonSide)
     switch(side) do side

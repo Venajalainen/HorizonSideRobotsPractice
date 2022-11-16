@@ -29,6 +29,7 @@ get_coords( robot :: BorderRobot ) = get_coords( get_robot( robot ) )
 
 get_direction( robot :: BorderRobot ; initial = false ) = if initial robot.initial_direction else robot.direction end
 get_rotation( robot :: BorderRobot ) = robot.rotation
+get_borderwall( robot :: BorderRobot ) = ( get_rotation( robot ) == Right ? right!( robot ) : left!( robot ) )
 
 right!( side :: HorizonSide ) :: HorizonSide = anticlockwise( side )
 right!( robot :: BorderRobot ) :: HorizonSide = anticlockwise( get_direction(robot) )
@@ -37,8 +38,8 @@ left!( side :: HorizonSide ) :: HorizonSide = clockwise( side )
 left!( robot :: BorderRobot ) :: HorizonSide = clockwise( get_direction(robot) )
 
 function rotate!(robot :: BorderRobot )
-    activate!( robot )
-    ( robot.direction = ( get_rotation(robot) == Right ? right!( robot ) : left!( robot ) ) )
+    activate!( robot, isborder(robot,get_borderwall(robot)) )
+    robot.direction = get_borderwall( robot )
 end
 
 function change_rotation!( robot :: BorderRobot )
@@ -82,8 +83,8 @@ function need_move(robot :: BorderRobot, wallside :: HorizonSide) :: Bool
     end
     if isborder( robot ) && ( !isborder( robot, right!( robot ) ) || !isborder( robot, left!( robot ) ) )
         if isborder( robot, ( get_rotation( robot ) == Right ? right!( robot ) : left!( robot ) ) )
+            activate!( robot, isborder(robot,wallside))
             robot.direction=( get_rotation( robot ) == Right ? left!( robot ) : right!( robot ) )
-            activate!( robot )
             return false
         end
     end
@@ -97,7 +98,7 @@ end
 
 #move or rotate till the ability
 function HorizonSideRobots.move!( robot :: BorderRobot)
-    wallside = ( get_rotation( robot ) == Right ? right!( robot ) : left!( robot ) )
+    wallside = get_borderwall( robot )
     if need_move( robot ,wallside ) != false
         move!(robot, get_direction( robot ) )
     end
