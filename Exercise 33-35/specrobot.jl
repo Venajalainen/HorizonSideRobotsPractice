@@ -38,7 +38,6 @@ left!( side :: HorizonSide ) :: HorizonSide = clockwise( side )
 left!( robot :: BorderRobot ) :: HorizonSide = clockwise( get_direction(robot) )
 
 function rotate!(robot :: BorderRobot )
-    activate!( robot, isborder(robot,get_borderwall(robot)) )
     robot.direction = get_borderwall( robot )
 end
 
@@ -83,7 +82,6 @@ function need_move(robot :: BorderRobot, wallside :: HorizonSide) :: Bool
     end
     if isborder( robot ) && ( !isborder( robot, right!( robot ) ) || !isborder( robot, left!( robot ) ) )
         if isborder( robot, ( get_rotation( robot ) == Right ? right!( robot ) : left!( robot ) ) )
-            activate!( robot, isborder(robot,wallside))
             robot.direction=( get_rotation( robot ) == Right ? left!( robot ) : right!( robot ) )
             return false
         end
