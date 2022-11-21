@@ -1,4 +1,4 @@
 include("where_i_am.jl")
-r=Robot("test1.sit")
-where_i_am(r)
+r=Robot("test4.sit"; animate=true)
+where_i_am(r) |> println
 show!(r)

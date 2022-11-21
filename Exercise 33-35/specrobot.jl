@@ -20,7 +20,7 @@ mutable struct BorderRobot <: SampleRobot
             end
             side = right!( side )
         end
-        if trapped println( "I am trapped" ) ; return new(  robot , Right , Nord , Nord ) end
+        if trapped return new(  robot , Right , Nord , Nord ) end
         throw( BadStartingCondition() )
     end
 end
@@ -98,7 +98,7 @@ end
 function HorizonSideRobots.move!( robot :: BorderRobot)
     wallside = get_borderwall( robot )
     if need_move( robot ,wallside ) != false
-        move!(robot, get_direction( robot ) )
+        move!(robot, get_direction( robot ))
     end
 end
 

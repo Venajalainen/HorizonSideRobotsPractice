@@ -1,5 +1,5 @@
 include("../RobotHell.jl")
-include("../Exercise33-35/specrobot.jl")
+include("../Exercise 33-35/specrobot.jl")
 
 mutable struct NorthernRobot <: AbstractCoordRobots
     robot :: CoordRobot
@@ -13,13 +13,11 @@ function HorizonSideRobots.move!(robot :: NorthernRobot, side :: HorizonSide)
     move!(get_robot(robot),side)
 end
 
-get_coords( robot :: NorthernRobot ) = get_coords( get_robot( robot ) )
-
 get_northern_coords( robot :: BorderRobot) = get_northern_coords(get_robot( robot ) )
 get_northern_coords( robot :: NorthernRobot) = ( 0 , robot.Ny )
 
-function northern_frontier( robot :: Robot ) :: Nothing
+function northern_frontier( robot :: Robot )
     brobot=BorderRobot( NorthernRobot( robot ) )
     around_the_world!( brobot )
-    get_northern_coords( brobot ) |> println
+    return get_northern_coords( brobot )
 end

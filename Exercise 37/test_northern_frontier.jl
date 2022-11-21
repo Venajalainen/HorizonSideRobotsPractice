@@ -1,4 +1,5 @@
 include("northern_frontier.jl")
-r=Robot("test2.sit"; animate=true)
+r=Robot("test2.sit")
 #putmarker!(r)
 northern_frontier( r )
+show!(r)

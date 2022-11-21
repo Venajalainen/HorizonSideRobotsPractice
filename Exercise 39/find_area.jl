@@ -17,7 +17,6 @@ function HorizonSideRobots.move!(robot :: AreaFinder, side :: HorizonSide)
     move!( get_robot(robot), side)
 end
 
-get_coords( robot :: AreaFinder ) = get_coords( get_robot(robot) )
 get_points( robot :: AreaFinder ) = robot.points
 
 function find_area!( robot :: AreaFinder)
