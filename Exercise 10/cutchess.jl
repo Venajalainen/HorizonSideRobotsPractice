@@ -1,7 +1,5 @@
 using HorizonSideRobots
 
-inverse(side :: HorizonSide) = HorizonSide(mod(Int(side)+2,4))
-
 function collibrate(r :: Robot; track=true)
     arr=()
     while !isborder(r,Sud) || !isborder(r,West)
