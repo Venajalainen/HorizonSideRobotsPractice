@@ -77,10 +77,10 @@ end
 
 #it works
 function need_move(robot :: BorderRobot, wallside :: HorizonSide) :: Bool
-    if !isborder( robot ) && !isborder( robot, wallside )
+    if !isborder( robot, wallside ) && !isborder( robot )
         rotate!( robot ) ; return true
     end
-    if isborder( robot ) && ( !isborder( robot, right!( robot ) ) || !isborder( robot, left!( robot ) ) )
+    if ( !isborder( robot, right!( robot ) ) || !isborder( robot, left!( robot ) ) ) && isborder( robot )
         if isborder( robot, ( get_rotation( robot ) == Right ? right!( robot ) : left!( robot ) ) )
             robot.direction=( get_rotation( robot ) == Right ? left!( robot ) : right!( robot ) )
             return false
