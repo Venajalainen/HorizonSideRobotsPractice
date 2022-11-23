@@ -1,4 +1,4 @@
 include("count_labs.jl")
-r = Robot("test.sit")
-count_labs( r )
+r = Robot("test2.sit")
+count_labs( r ) |> println
 show!(r)

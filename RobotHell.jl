@@ -13,13 +13,13 @@ HorizonSideRobots.ismarker(robot::SampleRobot) = ismarker(get_robot(robot))
 HorizonSideRobots.temperature(robot::SampleRobot) = temperature(get_robot(robot))
 HorizonSideRobots.ismarker(r :: SampleRobot) = ismarker(get_robot(r))
 
-abstract type AbstractCoordRobots <: SampleRobot end
+abstract type CoordFamily <: SampleRobot end
 
-get_coords(robot :: AbstractCoordRobots) = get_coords( get_robot( robot ))
+get_coords(robot :: CoordFamily) = get_coords( get_robot( robot ))
 
 #coord robot remembers start coordinate
 
-mutable struct CoordRobot <: SampleRobot
+mutable struct CoordRobot <: CoordFamily
     robot :: Union{SampleRobot,Robot}
     x :: Int
     y :: Int

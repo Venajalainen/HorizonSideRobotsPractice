@@ -1,10 +1,11 @@
 include("../RobotHell.jl")
 include("../Exercise 33-35/specrobot.jl")
 
-mutable struct AreaFinder <: AbstractCoordRobots
-    robot :: SampleRobot
+mutable struct AreaFinder <: CoordFamily
+    robot :: Union{Robot,SampleRobot}
     points :: Dict{Int,Vector{Int}}
-    AreaFinder( robot ) = new( CoordRobot(robot,0,0) , Dict{Int,Vector{Int}}())
+    AreaFinder( robot :: CoordFamily ) = new( robot , Dict{Int,Vector{Int}}())
+    AreaFinder( robot :: Union{Robot,SampleRobot} ) = new( CoordRobot(robot) , Dict{Int,Vector{Int}}())
 end
 
 function HorizonSideRobots.move!(robot :: AreaFinder, side :: HorizonSide)
@@ -30,5 +31,5 @@ end
 function find_area!( robot :: Robot )
     areafinder=BorderRobot( AreaFinder( robot ) )
     around_the_world!( areafinder )
-    find_area!( get_robot(areafinder) ) |> println
+    return find_area!( get_robot(areafinder) )
 end

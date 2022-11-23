@@ -5,14 +5,19 @@ using HorizonSideRobots
 @enum Rotation Right = 0 Left = 1
 
 mutable struct BorderRobot <: SampleRobot
-    robot :: AbstractCoordRobots
+
+    robot :: CoordFamily
     rotation :: Rotation
     direction :: HorizonSide
     initial_direction :: HorizonSide
-    function BorderRobot( robot :: Union{AbstractCoordRobots,Robot} )
+
+    function BorderRobot( robot :: Union{CoordFamily,Robot} )
+
         side :: HorizonSide = Nord
         trapped :: Bool = true
+
         if typeof(robot) <: Robot robot=CoordRobot(robot) end
+
         for i in 1:4
             trapped = ( trapped && isborder( robot , side ) )
             if !isborder( robot , side ) && isborder( robot , right!( side ) )
@@ -20,9 +25,13 @@ mutable struct BorderRobot <: SampleRobot
             end
             side = right!( side )
         end
+
         if trapped return new(  robot , Right , Nord , Nord ) end
+
         throw( BadStartingCondition() )
     end
+
+    BorderRobot( robot :: Union{CoordFamily,Robot}, wallside :: HorizonSide )= new(  robot , Right , left!(wallside) , left!(wallside) ) 
 end
 
 get_coords( robot :: BorderRobot ) = get_coords( get_robot( robot ) )
@@ -44,7 +53,6 @@ end
 function change_rotation!( robot :: BorderRobot )
     robot.direction = inverse( get_direction( robot ) )
 end
-
 
 HorizonSideRobots.isborder( robot :: BorderRobot ) :: Bool =isborder( robot, get_direction(robot) )
 
@@ -76,6 +84,7 @@ function around_the_world!( robot :: BorderRobot )
 end
 
 #it works
+
 function need_move(robot :: BorderRobot, wallside :: HorizonSide) :: Bool
     if !isborder( robot, wallside ) && !isborder( robot )
         rotate!( robot ) ; return true
@@ -95,6 +104,7 @@ function need_move(robot :: BorderRobot, wallside :: HorizonSide) :: Bool
 end
 
 #move or rotate till the ability
+
 function HorizonSideRobots.move!( robot :: BorderRobot)
     wallside = get_borderwall( robot )
     if need_move( robot ,wallside ) != false

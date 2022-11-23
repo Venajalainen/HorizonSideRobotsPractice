@@ -1,5 +1,4 @@
 include("northern_frontier.jl")
 r=Robot("test2.sit")
-#putmarker!(r)
-northern_frontier( r )
+northern_frontier( r ) |> println
 show!(r)
