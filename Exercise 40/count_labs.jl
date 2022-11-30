@@ -34,6 +34,7 @@ function count_labs(st_robot :: Robot)
             else
                 r=LabRobot( st_robot , (x,y))
                 if amioutside(r;side=side)
+                    #putmarker!(r)
                     if !(get_lab( r ) in labs) 
                         push!(labs,get_lab(r))
                     end

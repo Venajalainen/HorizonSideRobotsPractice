@@ -111,3 +111,21 @@ gohome!(robot :: Union{SampleRobot, Robot}, arr :: NTuple) =
 for side in arr 
     move!(robot,side)
 end
+
+#testing
+
+function test_func( test_function :: Function, test :: Array{Int}; animate=false)
+    for i in test
+        r=Robot("test$i.sit"; animate=animate)
+        "test$i.sit : " |> print; test_function( r ) |> println
+        show!(r)
+    end
+end
+
+function test_func( test_function :: Function, test :: Int;  animate=false)
+    for i in 1:test
+        r=Robot("test$i.sit"; animate=animate)
+        "test$i.sit : " |> print; test_function( r ) |> println
+        show!(r)
+    end
+end

@@ -1,14 +1,11 @@
 using HorizonSideRobots
+include("../RobotHell.jl")
 
-mutable struct AndrCrossRobot
+mutable struct AndrCrossRobot <: CoordFamily
     robot :: Robot
     x :: Int
     y :: Int
 end
-
-switch(f :: Function, x...) = f(x...)
-
-inverse(side :: HorizonSide) = HorizonSide(mod(Int(side)+2,4))
 
 function HorizonSideRobots.move!(r :: AndrCrossRobot, side :: HorizonSide)
     switch(side) do side
@@ -19,10 +16,6 @@ function HorizonSideRobots.move!(r :: AndrCrossRobot, side :: HorizonSide)
     end
     move!(r.robot,side)
 end
-
-HorizonSideRobots.isborder(r :: AndrCrossRobot, side :: HorizonSide) = isborder(r.robot,side)
-
-HorizonSideRobots.ismarker(r :: AndrCrossRobot) = ismarker(r.robot)
 
 HorizonSideRobots.putmarker!(r :: AndrCrossRobot) = abs(r.x)==abs(r.y) && putmarker!(r.robot)
 

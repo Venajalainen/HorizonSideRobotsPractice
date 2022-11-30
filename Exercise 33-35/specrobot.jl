@@ -31,7 +31,21 @@ mutable struct BorderRobot <: SampleRobot
         throw( BadStartingCondition() )
     end
 
-    BorderRobot( robot :: Union{CoordFamily,Robot}, wallside :: HorizonSide )= new(  robot , Right , left!(wallside) , left!(wallside) ) 
+    function BorderRobot( robot :: Union{CoordFamily,Robot}, wallside :: HorizonSide )
+
+        if typeof(robot) <: Robot robot=CoordRobot(robot) end
+
+        side=wallside; rotation=Right
+        if !isborder(robot, left!(wallside))
+            side=left!(wallside)
+        else
+            if !isborder(robot,right!(wallside))
+                side=right!(wallside)
+                rotation=Left
+            end
+        end
+        return new( robot , rotation ,side,side)
+    end
 end
 
 get_coords( robot :: BorderRobot ) = get_coords( get_robot( robot ) )
@@ -51,7 +65,7 @@ function rotate!(robot :: BorderRobot )
 end
 
 function change_rotation!( robot :: BorderRobot )
-    robot.direction = inverse( get_direction( robot ) )
+    robot.rotation = inverse( get_direction( robot ) )
 end
 
 HorizonSideRobots.isborder( robot :: BorderRobot ) :: Bool =isborder( robot, get_direction(robot) )
