@@ -39,7 +39,7 @@ function count_labs(st_robot :: Robot)
 
     robot :: CoordRobot = CoordRobot(st_robot)
     coords :: Set{NTuple{2,Int}} = Set{NTuple{2,Int}}()
-    labs :: Set{NTuple{2,Int}} = Set{Set{NTuple{2,Int}}}()
+    labs :: Set{Set{NTuple{2,Int}}} = Set{Set{NTuple{2,Int}}}()
 
     function recursive()
 
