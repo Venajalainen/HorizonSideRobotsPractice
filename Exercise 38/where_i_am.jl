@@ -45,8 +45,12 @@ end
 function where_i_am( robot :: RobotType ) where RobotType <: Union{Robot, SampleRobot}
 
     if amioutside(robot)
+
         return "I am outside" 
+
     else
+
         return "I am inside" 
+        
     end
 end
