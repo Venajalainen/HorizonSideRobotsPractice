@@ -2,37 +2,48 @@ include("../RobotHell.jl")
 include("../Exercise 33-35/specrobot.jl")
 include("../Exercise 37/northern_frontier.jl")
 
-mutable struct Checker <: CoordFamily
-    robot :: SampleRobot
-    x :: Int
-    y :: Int
+mutable struct Checker{RobotType} <: CoordFamily
+
+    robot :: RobotType
+    coords :: NTuple{2,Int}
     outside :: Bool
     rotation :: Rotation
-    Checker( robot :: CoordFamily, (x,y) :: NTuple{2,Int})=new( robot , x,y , true, Right)
-    Checker( robot :: Union{Robot,SampleRobot}, (x,y) :: NTuple{2,Int})=new( CoordRobot(robot) , x,y , true, Right)
-end
 
-get_rotation( robot :: Checker ) = robot.rotation
-get_borderwall( robot :: Checker, side :: HorizonSide ) = ( get_rotation( robot ) == Right ? right!( side ) : left!( side ) )
+    function Checker{RobotType}( robot :: RobotType ; side :: Union{Nothing, HorizonSide} = nothing) where RobotType <: Union{Robot,SampleRobot}
+        
+        new_robot = typeof(robot) <: CoordFamily ? robot : CoordRobot( robot )
+        coords :: NTuple{2,Int} = northern_frontier( robot ; side=side)
+        outside :: Bool = true
+        rotation :: Rotation = get_rotation( BorderRobot( robot , side) )
+
+        return new{typeof(robot)}( new_robot , coords, outside ,rotation )
+
+    end
+
+end
 
 function HorizonSideRobots.isborder( robot :: Checker , side :: HorizonSide) 
-    r=get_robot(robot); borderwall=get_borderwall(robot,side)
-    if get_coords(robot) == (robot.x,robot.y) && isborder(r,borderwall) && borderwall==Nord
-        robot.outside=false
-    end
-    isborder( r, side )
+
+    borderwall = ( robot.rotation == Right ? right!( side ) : left!( side ) )
+
+    (get_coords(robot) == robot.coords && isborder(get_robot(robot),borderwall) && borderwall==Nord) && (robot.outside=false)
+
+    isborder( get_robot(robot), side )
 end
 
-function amioutside( robot :: Union{Robot,CoordFamily}; side = nothing :: Union{HorizonSide,Nothing}) 
-    ncoord=northern_frontier( robot; side=side )
-    checker=Checker(robot, ncoord)
+function amioutside( robot :: RobotType; side = nothing :: Union{HorizonSide,Nothing}) where RobotType <: Union{ Robot, SampleRobot}
+
+    checker=Checker{RobotType}(robot; side=side)
+
     if side!==nothing brobot=BorderRobot( checker, side ) else brobot=BorderRobot( checker ) end
-    checker.rotation=get_rotation( brobot )
+
     around_the_world!(brobot)
+
     return checker.outside
 end
 
-function where_i_am( robot :: Union{Robot,CoordFamily} )
+function where_i_am( robot :: RobotType ) where RobotType <: Union{Robot, SampleRobot}
+
     if amioutside(robot)
         return "I am outside" 
     else

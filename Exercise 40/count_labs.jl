@@ -17,8 +17,6 @@ struct LabRobot{TypeRobot} <: CoordFamily
         new{typeof(new_robot)}( new_robot, track, reference )
     end
 
-    #LabRobot( robot :: CoordFamily, (x,y) :: NTuple{2,Int}) = new(robot, Set{NTuple{2,Int}}([(x,y)]))
-    #LabRobot( robot :: Union{Robot,SampleRobot}, (x,y) :: NTuple{2,Int}) = new( CoordRobot(robot), Set{NTuple{2,Int}}([(x,y)]),(x,y))
 end
 
 function HorizonSideRobots.move!( robot :: LabRobot, side :: HorizonSide)
