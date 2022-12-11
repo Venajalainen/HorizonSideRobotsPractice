@@ -19,19 +19,19 @@ mutable struct BorderRobot{RobotType} <: CoordFamily
 
         if side !== nothing 
 
-            if !isborder(robot, left!(new_side))
+            if !isborder(new_robot, left!(new_side))
 
-                new_side=left!(new_side)
+                new_side = left!(new_side)
     
             else
 
-                !isborder(robot,right!(new_side)) && 
+                !isborder(new_robot,right!(new_side)) && 
 
                 begin 
 
-                    new_side=right!(new_side); 
-                    rotation=Left 
-                    
+                    new_side = right!(new_side); 
+                    rotation = Left 
+
                 end
 
             end
@@ -44,18 +44,18 @@ mutable struct BorderRobot{RobotType} <: CoordFamily
 
         for i in 1:4
 
-            trapped = ( trapped || isborder( robot , new_side ) )
+            trapped = trapped || isborder( new_robot , new_side )
 
-            (!isborder( robot , new_side ) && isborder( robot , right!( new_side ) ) ) &&  (return new{typeof(new_robot)}(  new_robot , Right , new_side , new_side ) )
+            (!isborder( new_robot , new_side ) && isborder( new_robot , right!( new_side ) ) ) &&  (return new{typeof(new_robot)}(  new_robot , Right , new_side , new_side ) )
 
-            side = right!( new_side )
+            new_side = right!( new_side )
 
         end
 
         trapped && (return new{typeof(new_robot)}(  new_robot , Right , Nord , Nord ))
 
         throw( BadStartingCondition() )
-        
+
     end
 
 end

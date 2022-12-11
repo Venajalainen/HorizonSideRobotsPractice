@@ -1,35 +1,57 @@
 include("../RobotHell.jl")
 include("../Exercise 33-35/specrobot.jl")
 
-mutable struct AreaFinder <: CoordFamily
-    robot :: Union{Robot,SampleRobot}
-    points :: Dict{Int,Vector{Int}}
-    AreaFinder( robot :: CoordFamily ) = new( robot , Dict{Int,Vector{Int}}())
-    AreaFinder( robot :: Union{Robot,SampleRobot} ) = new( CoordRobot(robot) , Dict{Int,Vector{Int}}())
+mutable struct AreaFinder{RobotType} <: CoordFamily
+
+    robot :: RobotType
+    area :: Int
+    rotation :: Rotation
+    horizontal_direction :: HorizonSide
+
+    function AreaFinder{RobotType}( robot :: RobotType) where RobotType <: Union{Robot, SampleRobot}
+
+        brobot= BorderRobot{RobotType}( robot  )
+
+        new_robot :: CoordFamily = new_robot = typeof(robot) <: CoordFamily ? robot : CoordRobot( robot )
+        area :: Int = 0
+        rotation :: Rotation = get_rotation( brobot )
+        horizontal_direction :: HorizonSide = get_direction(brobot) in [West,Ost] ? get_direction(brobot) : West
+
+        return new{typeof(new_robot)}( new_robot, area, rotation, horizontal_direction)
+
+    end
+
 end
+
+add_area( robot :: AreaFinder, number :: Int, y :: Int) = (robot.area=robot.area+y*(number-2)-1*mod(number,3))
 
 function HorizonSideRobots.move!(robot :: AreaFinder, side :: HorizonSide)
-    x,y = get_coords( robot )
-    if y in keys(robot.points)
-        !(x in robot.points[y]) && push!(robot.points[y],x)
-    else
-        robot.points[y]=Vector{Int}([x])
+
+    r=get_robot(robot)
+    x, y=get_coords(robot)
+
+
+    if isborder(r,Nord) && isborder(r,Sud) && inverse(side)==robot.horizontal_direction
+        add_area(robot,Int(robot.horizontal_direction),y)
     end
-    move!( get_robot(robot), side)
+
+    (side in [West,Ost]) && (robot.horizontal_direction=side) 
+    
+    borderwall :: HorizonSide = robot.rotation == Right ? right!( robot.horizontal_direction ) : left!( robot.horizontal_direction )
+
+    if isborder(r,borderwall)
+        putmarker!(r)
+        add_area(robot,Int(robot.horizontal_direction),y)
+    end
+
+    move!(r, side)
 end
 
-get_points( robot :: AreaFinder ) = robot.points
+function find_area!( robot :: RobotType ) where RobotType <: Union{Robot, SampleRobot}
 
-function find_area!( robot :: AreaFinder)
-    area=0; points=robot.points
-    for key in keys(points)
-        area+=maximum(points[key])-minimum(points[key]) - length(points[key])+1
-    end
-    return area
-end
+    areafinder = AreaFinder{RobotType}( robot )
 
-function find_area!( robot :: Robot )
-    areafinder=BorderRobot( AreaFinder( robot ) )
     around_the_world!( areafinder )
-    return find_area!( get_robot(areafinder) )
+
+    return abs(areafinder.area)
 end
