@@ -36,9 +36,7 @@ function northern_frontier( robot :: RobotType; side = nothing :: Union{HorizonS
 
     northern :: NorthernRobot = NorthernRobot{RobotType}( robot ; side=side )
 
-    if side!==nothing brobot=BorderRobot( northern, side ) else brobot=BorderRobot( northern ) end
-
-    around_the_world!( brobot )
+    around_the_world!( northern ; side=side )
 
     return get_Ncoords( northern )
 end

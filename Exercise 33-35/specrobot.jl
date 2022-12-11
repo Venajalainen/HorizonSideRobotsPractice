@@ -11,12 +11,12 @@ mutable struct BorderRobot <: SampleRobot
     direction :: HorizonSide
     initial_direction :: HorizonSide
 
-    function BorderRobot( robot :: Union{CoordFamily,Robot} )
+    function BorderRobot( robot :: Union{SampleRobot,Robot} )
 
         side :: HorizonSide = Nord
         trapped :: Bool = true
 
-        if typeof(robot) <: Robot robot=CoordRobot(robot) end
+        if !(typeof(robot) <: CoordFamily) robot=CoordRobot(robot) end
 
         for i in 1:4
             trapped = ( trapped && isborder( robot , side ) )
@@ -31,9 +31,9 @@ mutable struct BorderRobot <: SampleRobot
         throw( BadStartingCondition() )
     end
 
-    function BorderRobot( robot :: Union{CoordFamily,Robot}, wallside :: HorizonSide )
+    function BorderRobot( robot :: Union{SampleRobot,Robot}, wallside :: HorizonSide )
 
-        if typeof(robot) <: Robot robot=CoordRobot(robot) end
+        if !(typeof(robot) <: CoordFamily) robot=CoordRobot(robot) end
 
         side=wallside; rotation=Right
         if !isborder(robot, left!(wallside))
@@ -92,9 +92,15 @@ function along!( cond :: Function , robot :: BorderRobot, steps :: Int ; rotatio
     steps>0 && return steps
 end
 
-function around_the_world!( robot :: BorderRobot )
-    move!( robot )
-    along!((x...)-> ( get_coords( robot ) != ( 0,0 ) || get_direction( robot ) != get_direction( robot ; initial = true ) ) , robot )
+function around_the_world!( robot :: RobotType ; side :: Union{Nothing, HorizonSide} = nothing ) where RobotType <: Union{Robot, SampleRobot}
+    if side===nothing
+        brobot=BorderRobot( robot )
+    else
+        brobot = BorderRobot( robot , side) 
+    end
+
+    move!( brobot )
+    along!((x...)-> ( get_coords( brobot ) != ( 0,0 ) || get_direction( brobot ) != get_direction( brobot ; initial = true ) ) , brobot )
 end
 
 #it works

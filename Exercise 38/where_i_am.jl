@@ -35,9 +35,7 @@ function amioutside( robot :: RobotType; side = nothing :: Union{HorizonSide,Not
 
     checker=Checker{RobotType}(robot; side=side)
 
-    if side!==nothing brobot=BorderRobot( checker, side ) else brobot=BorderRobot( checker ) end
-
-    around_the_world!(brobot)
+    around_the_world!( checker ; side=side )
 
     return checker.outside
 end
