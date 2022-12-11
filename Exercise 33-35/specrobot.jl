@@ -4,48 +4,60 @@ using HorizonSideRobots
 
 @enum Rotation Right = 0 Left = 1
 
-mutable struct BorderRobot <: SampleRobot
+mutable struct BorderRobot{RobotType} <: CoordFamily
 
-    robot :: CoordFamily
+    robot :: RobotType
     rotation :: Rotation
     direction :: HorizonSide
     initial_direction :: HorizonSide
 
-    function BorderRobot( robot :: Union{SampleRobot,Robot} )
+    function BorderRobot{RobotType}( robot :: RobotType; side :: Union{Nothing, HorizonSide} = nothing ) where RobotType <: Union{Robot, SampleRobot}
 
-        side :: HorizonSide = Nord
+        new_robot :: CoordFamily = typeof(robot) <: CoordFamily ? robot : CoordRobot( robot )
+        new_side :: HorizonSide = side === nothing ? Nord : side
+        rotation :: Rotation = Right
+
+        if side !== nothing 
+
+            if !isborder(robot, left!(new_side))
+
+                new_side=left!(new_side)
+    
+            else
+
+                !isborder(robot,right!(new_side)) && 
+
+                begin 
+
+                    new_side=right!(new_side); 
+                    rotation=Left 
+                    
+                end
+
+            end
+
+            return new{typeof(new_robot)}( new_robot, rotation, new_side, new_side )
+
+        end
+
         trapped :: Bool = true
 
-        if !(typeof(robot) <: CoordFamily) robot=CoordRobot(robot) end
-
         for i in 1:4
-            trapped = ( trapped && isborder( robot , side ) )
-            if !isborder( robot , side ) && isborder( robot , right!( side ) )
-                return new(  robot , Right , side , side ) 
-            end
-            side = right!( side )
+
+            trapped = ( trapped || isborder( robot , new_side ) )
+
+            (!isborder( robot , new_side ) && isborder( robot , right!( new_side ) ) ) &&  (return new{typeof(new_robot)}(  new_robot , Right , new_side , new_side ) )
+
+            side = right!( new_side )
+
         end
 
-        if trapped return new(  robot , Right , Nord , Nord ) end
+        trapped && (return new{typeof(new_robot)}(  new_robot , Right , Nord , Nord ))
 
         throw( BadStartingCondition() )
+        
     end
 
-    function BorderRobot( robot :: Union{SampleRobot,Robot}, wallside :: HorizonSide )
-
-        if !(typeof(robot) <: CoordFamily) robot=CoordRobot(robot) end
-
-        side=wallside; rotation=Right
-        if !isborder(robot, left!(wallside))
-            side=left!(wallside)
-        else
-            if !isborder(robot,right!(wallside))
-                side=right!(wallside)
-                rotation=Left
-            end
-        end
-        return new( robot , rotation ,side,side)
-    end
 end
 
 get_coords( robot :: BorderRobot ) = get_coords( get_robot( robot ) )
@@ -73,7 +85,7 @@ HorizonSideRobots.isborder( robot :: BorderRobot ) :: Bool =isborder( robot, get
 function along!( robot :: BorderRobot , steps :: Int; rotation :: Rotation = Right) :: Nothing
     rotation == Left && change_rotation!( robot )
     while steps>0 
-        move!( robot ); steps -= 1 
+        move!( robot ) && (steps -= 1 )
     end
 end
 
@@ -87,39 +99,43 @@ end
 function along!( cond :: Function , robot :: BorderRobot, steps :: Int ; rotation :: Rotation = Right) :: Union{Int, Nothing} 
     rotation == Left && change_rotation!( robot )
     while cond( robot ) && steps>0 
-        move!( robot ); steps -= 1 
+        move!( robot ) && (steps -= 1 )
     end
     steps>0 && return steps
 end
 
 function around_the_world!( robot :: RobotType ; side :: Union{Nothing, HorizonSide} = nothing ) where RobotType <: Union{Robot, SampleRobot}
-    if side===nothing
-        brobot=BorderRobot( robot )
-    else
-        brobot = BorderRobot( robot , side) 
-    end
+
+    brobot = BorderRobot{RobotType}( robot ; side=side) 
 
     move!( brobot )
+
     along!((x...)-> ( get_coords( brobot ) != ( 0,0 ) || get_direction( brobot ) != get_direction( brobot ; initial = true ) ) , brobot )
+
 end
 
 #it works
 
 function need_move(robot :: BorderRobot, wallside :: HorizonSide) :: Bool
+
     if !isborder( robot, wallside ) && !isborder( robot )
         rotate!( robot ) ; return true
     end
+    
     if ( !isborder( robot, right!( robot ) ) || !isborder( robot, left!( robot ) ) ) && isborder( robot )
         if isborder( robot, ( get_rotation( robot ) == Right ? right!( robot ) : left!( robot ) ) )
             robot.direction=( get_rotation( robot ) == Right ? left!( robot ) : right!( robot ) )
             return false
         end
     end
+
     i=0
+
     while isborder( robot ) && i<4
         rotate!( robot )
         i+=1
     end
+
     return i<=1
 end
 

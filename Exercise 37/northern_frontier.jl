@@ -11,7 +11,7 @@ mutable struct NorthernRobot{RobotType} <: CoordFamily
 
         new_robot = typeof(robot) <: CoordFamily ? robot : CoordRobot( robot )
         Ny :: Int =0
-        rotation :: Rotation = get_rotation( BorderRobot( robot , side ) )
+        rotation :: Rotation = get_rotation( BorderRobot{RobotType}( robot ; side ) )
 
         new{typeof(new_robot)}( new_robot , Ny, rotation )
 
