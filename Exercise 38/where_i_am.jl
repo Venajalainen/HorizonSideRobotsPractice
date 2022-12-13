@@ -16,7 +16,7 @@ mutable struct Checker{RobotType} <: CoordFamily
         outside :: Bool = true
         rotation :: Rotation = get_rotation( BorderRobot{RobotType}( robot ; side=side) )
 
-        return new{typeof(robot)}( new_robot , coords, outside ,rotation )
+        return new{typeof(new_robot)}( new_robot , coords, outside ,rotation )
 
     end
 
