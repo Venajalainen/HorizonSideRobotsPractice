@@ -118,7 +118,7 @@ function test_func( test_function :: Function, test :: Array{Int}; animate=false
     for i in test
         r=Robot("test$i.sit"; animate=animate)
         "test$i.sit : " |> print; test_function( r ) |> println
-        show!(r)
+        !animate && show!(r)
     end
 end
 
@@ -126,6 +126,6 @@ function test_func( test_function :: Function, test :: Int;  animate=false)
     for i in 1:test
         r=Robot("test$i.sit"; animate=animate)
         "test$i.sit : " |> print; test_function( r ) |> println
-        show!(r)
+        !animate && show!(r)
     end
 end
